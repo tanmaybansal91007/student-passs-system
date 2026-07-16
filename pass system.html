@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DigiPass — Digital Classroom Pass System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════ TOKENS ═══════════ */
+:root{
+  --b1:#1248B3;--b2:#1E63D4;--b3:#3B82F6;--b4:#60A5FA;
+  --bp:#EBF3FF;--bm:#DBEAFE;
+  --g1:#14532D;--g2:#166534;--g3:#16A34A;--g4:#22C55E;
+  --gp:#ECFDF5;
+  --t1:#0F766E;--t2:#0D9488;--t3:#14B8A6;
+  --a1:#92400E;--a2:#D97706;--a3:#F59E0B;
+  --r1:#7F1D1D;--r2:#DC2626;--r3:#EF4444;--rp:#FEF2F2;
+  --o1:#9A3412;--o2:#EA580C;--o3:#FB923C;--op:#FFF7ED;
+  --d1:#060F1E;--d2:#0D1B35;--d3:#162445;--d4:#1E3358;--d5:#2A4272;
+  --tx:#1A2B45;--mu:#5B7499;--mu2:#8BA4C0;
+  --bd:#D4E4F7;--bd2:#E8F1FB;--bd3:#F0F6FF;
+  --card:#fff;--bg:#EEF5FF;--bg2:#F5F9FF;--bg3:#F8FAFF;
+  --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --r:14px;--rs:9px;--rss:6px;
+  --sh:0 2px 16px rgba(18,72,179,.07);
+  --shm:0 8px 36px rgba(18,72,179,.13);
+  --shl:0 20px 60px rgba(18,72,179,.18);
+  --sw:240px;--th:62px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);color:var(--tx);background:var(--bg);min-height:100vh;overflow-x:hidden;line-height:1.6}
+button{font-family:var(--fb);cursor:pointer;border:none;outline:none}
+input,select{font-family:var(--fb)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--b3);border-radius:99px}
+
+/* ═══════════ ANIMATIONS ═══════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes timerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(32px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(32px) scale(.95)}}
+@keyframes ringPulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}70%{box-shadow:0 0 0 14px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+@keyframes warnFlash{0%,100%{background:var(--op);border-color:rgba(234,88,12,.3)}50%{background:#FED7AA;border-color:rgba(234,88,12,.6)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes qrAppear{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes exceed{0%,100%{background:var(--rp)}50%{background:#FEE2E2}}
+
+/* ═══════════ LOGIN ═══════════ */
+#loginPage{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px;position:relative;overflow:hidden;
+  background:linear-gradient(145deg,var(--d1) 0%,var(--d2) 40%,#0A2645 80%,#081D3A 100%);
+}
+.orb{position:absolute;border-radius:50%;pointer-events:none}
+.orb1{width:720px;height:720px;top:-280px;right:-240px;background:radial-gradient(circle,rgba(30,99,212,.15),transparent 65%)}
+.orb2{width:520px;height:520px;bottom:-200px;left:-160px;background:radial-gradient(circle,rgba(13,148,136,.1),transparent 65%)}
+.orb3{width:360px;height:360px;top:50%;left:35%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(34,197,94,.06),transparent 65%)}
+.login-wrap{width:100%;max-width:450px;position:relative;z-index:1;animation:fadeUp .5s ease}
+.login-box{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(28px);border-radius:26px;padding:48px 44px;
+  box-shadow:0 32px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07);
+}
+.login-logo{text-align:center;margin-bottom:38px}
+.logo-icon-big{
+  width:72px;height:72px;margin:0 auto 14px;border-radius:22px;
+  background:linear-gradient(135deg,var(--b2),var(--b3));
+  display:flex;align-items:center;justify-content:center;font-size:2rem;
+  box-shadow:0 12px 36px rgba(30,99,212,.5),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.login-logo h1{font-family:var(--fh);font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:5px;letter-spacing:-.01em}
+.login-logo p{font-size:.83rem;color:rgba(255,255,255,.42)}
+.demo-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:32px}
+.demo-card{
+  padding:15px 12px;border-radius:var(--rs);cursor:pointer;text-align:center;
+  border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);
+  transition:all .22s;position:relative;overflow:hidden;
+}
+.demo-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(30,99,212,.22),rgba(13,148,136,.12));opacity:0;transition:opacity .22s}
+.demo-card:hover::after,.demo-card.sel::after{opacity:1}
+.demo-card.sel{border-color:var(--b3);box-shadow:0 0 0 3px rgba(59,130,246,.22)}
+.demo-card .dem-ico{font-size:1.5rem;display:block;margin-bottom:6px;position:relative;z-index:1}
+.demo-card .dem-role{font-family:var(--fh);font-size:.88rem;font-weight:700;color:#fff;position:relative;z-index:1}
+.demo-card .dem-cred{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:3px;position:relative;z-index:1}
+.lbl{display:block;font-size:.71rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.inp-wrap{position:relative;margin-bottom:16px}
+.inp-wrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:.88rem;pointer-events:none}
+.inp{
+  width:100%;padding:12px 14px 12px 40px;border-radius:var(--rs);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  color:#fff;font-size:.9rem;transition:all .2s;
+}
+.inp::placeholder{color:rgba(255,255,255,.28)}
+.inp:focus{outline:none;border-color:var(--b3);background:rgba(59,130,246,.1);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.login-err{
+  background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);
+  color:#FCA5A5;font-size:.82rem;padding:10px 14px;border-radius:var(--rs);
+  margin-bottom:16px;display:none;align-items:center;gap:8px;
+}
+.btn-lg{
+  width:100%;padding:14px;border-radius:var(--rs);border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--b1),var(--b3));color:#fff;
+  font-size:.95rem;font-weight:700;font-family:var(--fh);letter-spacing:.01em;
+  box-shadow:0 5px 24px rgba(18,72,179,.45);transition:transform .2s,box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+}
+.btn-lg:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(18,72,179,.55)}
+.login-foot{text-align:center;margin-top:20px;font-size:.75rem;color:rgba(255,255,255,.25)}
+
+/* ═══════════ APP SHELL ═══════════ */
+#appPage{display:none;min-height:100vh}
+.sidebar{
+  width:var(--sw);min-height:100vh;
+  background:linear-gradient(175deg,var(--d2) 0%,var(--d3) 60%,var(--d4) 100%);
+  position:fixed;left:0;top:0;bottom:0;z-index:300;
+  display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:3px 0 20px rgba(0,0,0,.25);
+}
+.sb-logo{padding:20px 18px 16px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo-ic{width:37px;height:37px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--b2),var(--b3));display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;box-shadow:0 3px 12px rgba(30,99,212,.4)}
+.sb-logo-t{font-family:var(--fh);font-size:1.02rem;font-weight:800;color:#fff}
+.sb-logo-s{font-size:.63rem;color:rgba(255,255,255,.32);margin-top:1px}
+.sb-user{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-av{width:37px;height:37px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.83rem;font-weight:700;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.av-t{background:linear-gradient(135deg,var(--b2),var(--b3))}
+.av-s{background:linear-gradient(135deg,var(--g2),var(--t2))}
+.sb-un{font-size:.83rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-rb{display:inline-flex;align-items:center;gap:4px;font-size:.64rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:2px}
+.rb-t{background:rgba(59,130,246,.25);color:var(--b4)}
+.rb-s{background:rgba(34,197,94,.2);color:#4ADE80}
+.sb-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.sb-sec{font-size:.61rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:8px 12px 4px;margin-top:4px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);color:rgba(255,255,255,.5);font-size:.83rem;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:2px;position:relative}
+.sb-item i.si{width:16px;text-align:center;font-size:.81rem;flex-shrink:0}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.88)}
+.sb-item.active{background:linear-gradient(90deg,rgba(30,99,212,.55),rgba(59,130,246,.18));color:#fff;font-weight:600}
+.sb-item.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:0 3px 3px 0;background:var(--b3)}
+.sb-item.active i.si{color:var(--b4)}
+.sb-badge{margin-left:auto;font-size:.62rem;font-weight:700;background:var(--a2);color:#fff;padding:2px 7px;border-radius:99px;min-width:20px;text-align:center;animation:pulse 1.5s infinite}
+.sb-bottom{padding:14px;border-top:1px solid rgba(255,255,255,.07)}
+.btn-logout{width:100%;padding:10px 14px;border-radius:var(--rs);background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.22);color:#FCA5A5;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s}
+.btn-logout:hover{background:rgba(220,38,38,.25)}
+.main{margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:var(--th);background:var(--card);border-bottom:1px solid var(--bd);padding:0 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 1px 8px rgba(18,72,179,.06)}
+.tb-l{display:flex;align-items:center;gap:12px}
+.hbtn{display:none;background:none;border:none;color:var(--mu);font-size:1.1rem;cursor:pointer;padding:5px}
+.tb-title{font-family:var(--fh);font-size:1.02rem;font-weight:700;color:var(--d2)}
+.tb-r{display:flex;align-items:center;gap:12px}
+.tb-time{font-size:.79rem;color:var(--mu);font-weight:500;font-variant-numeric:tabular-nums}
+.tb-live{display:flex;align-items:center;gap:6px;background:var(--gp);border:1px solid rgba(34,197,94,.22);color:var(--g3);font-size:.71rem;font-weight:700;padding:4px 11px;border-radius:99px}
+.ld{width:7px;height:7px;border-radius:50%;background:var(--g4);animation:pulse 1.8s infinite}
+.pw{padding:26px;flex:1}
+.panel{display:none;animation:fadeIn .3s ease}
+.panel.active{display:block}
+.sidebar-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:299}
+
+/* ═══════════ COMPONENTS ═══════════ */
+.banner{border-radius:var(--r);padding:26px 30px;margin-bottom:24px;color:#fff;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;right:-45px;top:-45px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none}
+.banner::before{content:'';position:absolute;right:65px;bottom:-35px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none}
+.bn-blue {background:linear-gradient(135deg,var(--b1),var(--b3))}
+.bn-green{background:linear-gradient(135deg,var(--g2),var(--t2))}
+.bn-dark {background:linear-gradient(135deg,var(--d2),var(--d5))}
+.bn-teal {background:linear-gradient(135deg,var(--t1),#0891B2)}
+.banner h2{font-family:var(--fh);font-size:1.2rem;font-weight:800;margin-bottom:4px;position:relative;z-index:1}
+.banner p{font-size:.84rem;opacity:.72;position:relative;z-index:1}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:15px;margin-bottom:24px}
+.sc{background:var(--card);border-radius:var(--r);padding:20px 18px;border:1px solid var(--bd);box-shadow:var(--sh);display:flex;align-items:flex-start;gap:13px;transition:transform .2s,box-shadow .2s;cursor:default}
+.sc:hover{transform:translateY(-3px);box-shadow:var(--shm)}
+.sc-ic{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.96rem}
+.ic-b{background:var(--bp);color:var(--b2)}.ic-g{background:var(--gp);color:var(--g3)}.ic-a{background:#FEF3C7;color:var(--a2)}.ic-r{background:var(--rp);color:var(--r2)}.ic-t{background:#F0FDFA;color:var(--t2)}
+.sc-v{font-family:var(--fh);font-size:1.85rem;font-weight:800;color:var(--d2);line-height:1}
+.sc-l{font-size:.74rem;color:var(--mu);margin-top:4px}
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--bd);box-shadow:var(--sh);padding:22px;margin-bottom:18px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.ct{font-family:var(--fh);font-size:.96rem;font-weight:700;color:var(--d2);display:flex;align-items:center;gap:8px}
+.ct i{color:var(--b3);font-size:.88rem}
+.btn{padding:9px 18px;border-radius:var(--rs);border:none;cursor:pointer;font-size:.85rem;font-weight:600;font-family:var(--fb);display:inline-flex;align-items:center;gap:7px;transition:all .2s}
+.bp{background:linear-gradient(135deg,var(--b1),var(--b3));color:#fff;box-shadow:0 3px 12px rgba(18,72,179,.28)}
+.bp:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(18,72,179,.4);color:#fff}
+.bg{background:linear-gradient(135deg,var(--g2),var(--t2));color:#fff;box-shadow:0 3px 12px rgba(13,148,136,.26)}
+.bg:hover{transform:translateY(-1px);color:#fff}
+.br{background:linear-gradient(135deg,var(--r2),var(--r3));color:#fff;box-shadow:0 3px 10px rgba(220,38,38,.23)}
+.br:hover{transform:translateY(-1px);color:#fff}
+.bo{background:var(--card);border:1.5px solid var(--bd);color:var(--mu)}
+.bo:hover{border-color:var(--b3);color:var(--b2);background:var(--bp)}
+.ba{background:linear-gradient(135deg,var(--a2),var(--a3));color:#fff;box-shadow:0 3px 10px rgba(217,119,6,.24)}
+.ba:hover{transform:translateY(-1px);color:#fff}
+.bsm{padding:6px 12px;font-size:.76rem;gap:5px;border-radius:var(--rss)}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:.74rem;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.field input,.field select{width:100%;padding:10px 13px;border-radius:var(--rs);border:1.5px solid var(--bd);background:var(--bg2);color:var(--tx);font-size:.87rem;transition:all .2s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--b3);background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.tag{font-size:.67rem;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.t-pend{background:#FEF3C7;color:var(--a2)}.t-appr{background:var(--gp);color:var(--g3)}.t-rej{background:var(--rp);color:var(--r2)}.t-ret{background:var(--bg3);color:var(--mu)}.t-act{background:var(--bp);color:var(--b2)}.t-exc{background:var(--rp);color:var(--r1);animation:exceed 2s infinite}
+
+/* Avatar colours */
+.av1{background:#1248B3}.av2{background:#166534}.av3{background:#0D9488}.av4{background:#6D28D9}.av5{background:#B45309}.av6{background:#B91C1C}.av7{background:#0369A1}.av8{background:#9D174D}
+
+/* Table */
+.twrap{overflow-x:auto;border-radius:var(--rss)}
+.dtbl{width:100%;border-collapse:collapse;min-width:560px}
+.dtbl th{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);padding:9px 13px;background:var(--bg2);border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+.dtbl td{padding:11px 13px;border-bottom:1px solid var(--bd2);font-size:.83rem;color:var(--tx);vertical-align:middle}
+.dtbl tr:last-child td{border-bottom:none}
+.dtbl tbody tr:hover td{background:var(--bg2)}
+.swrap{display:flex;align-items:center;gap:9px}
+.sav{width:29px;height:29px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#fff}
+.empty{text-align:center;padding:48px 20px;color:var(--mu)}
+.empty i{font-size:2.6rem;display:block;margin-bottom:12px;opacity:.22}
+.empty p{font-size:.88rem}
+
+/* Status banners */
+.stbanner{border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:13px;margin-bottom:20px}
+.stb-pend{background:#FEF3C7;border:1px solid rgba(217,119,6,.22)}
+.stb-app{background:var(--gp);border:1px solid rgba(34,197,94,.25)}
+.stb-rej{background:var(--rp);border:1px solid rgba(220,38,38,.2)}
+.stb-ico{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.96rem}
+.stb-pend .stb-ico{background:rgba(217,119,6,.14);color:var(--a2)}
+.stb-app .stb-ico{background:rgba(22,163,74,.12);color:var(--g3)}
+.stb-rej .stb-ico{background:rgba(220,38,38,.1);color:var(--r2)}
+.stb-txt h4{font-family:var(--fh);font-size:.9rem;font-weight:700;margin-bottom:3px}
+.stb-pend .stb-txt h4{color:#92400E}.stb-app .stb-txt h4{color:var(--g2)}.stb-rej .stb-txt h4{color:var(--r1)}
+.stb-txt p{font-size:.79rem}
+.stb-pend .stb-txt p{color:#B45309}.stb-app .stb-txt p{color:#166534}.stb-rej .stb-txt p{color:#991B1B}
+
+/* ═══════════ TRACKING CARDS ═══════════ */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:15px}
+.tcard{
+  background:var(--card);border-radius:var(--r);padding:20px;
+  border:1px solid var(--bd);box-shadow:var(--sh);
+  transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;
+}
+.tcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--b2),var(--g4))}
+.tcard:hover{transform:translateY(-3px);box-shadow:var(--shm)}
+.tcard.warn{border-color:rgba(234,88,12,.4);animation:warnFlash 2s infinite}
+.tcard.warn::before{background:linear-gradient(90deg,var(--o2),var(--a2))}
+.tcard.exceeded{border-color:rgba(220,38,38,.4);animation:exceed 2s infinite}
+.tcard.exceeded::before{background:linear-gradient(90deg,var(--r2),var(--r3))}
+.tc-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.tc-av{width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.9rem;font-weight:700;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.tc-name{font-family:var(--fh);font-size:.94rem;font-weight:700;color:var(--d2)}
+.tc-sub{font-size:.73rem;color:var(--mu);margin-top:2px}
+.tc-row{display:flex;align-items:center;gap:7px;font-size:.79rem;color:var(--mu);margin-bottom:7px}
+.tc-row i{width:14px;color:var(--b3);flex-shrink:0;font-size:.77rem}
+.tc-row span{color:var(--tx);font-weight:500}
+.tc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:13px;border-top:1px solid var(--bd2)}
+.timer-display{text-align:center}
+.timer-val{
+  font-family:var(--fh);font-size:1.5rem;font-weight:800;color:var(--b2);
+  font-variant-numeric:tabular-nums;line-height:1;
+  transition:color .3s;
+}
+.timer-val.warn{color:var(--o2);animation:timerPulse .8s infinite}
+.timer-val.exceeded{color:var(--r2);animation:timerPulse .5s infinite}
+.timer-lbl{font-size:.68rem;color:var(--mu);margin-top:3px}
+.timer-bar{
+  height:5px;border-radius:99px;background:var(--bd2);
+  margin-top:6px;overflow:hidden;
+}
+.timer-bar-fill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--g3),var(--b3));
+  transition:width .9s linear,background .3s;
+}
+.timer-bar-fill.warn{background:linear-gradient(90deg,var(--o2),var(--a3))}
+.timer-bar-fill.exceeded{background:var(--r2);width:0!important}
+
+/* ═══════════ QR MODAL ═══════════ */
+.modal-ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:900;display:none;align-items:center;justify-content:center;
+  padding:20px;backdrop-filter:blur(4px);
+}
+.modal-ov.open{display:flex}
+.modal{
+  background:var(--card);border-radius:20px;padding:32px;
+  max-width:360px;width:100%;
+  box-shadow:0 24px 80px rgba(0,0,0,.45);
+  animation:qrAppear .3s ease;
+  position:relative;
+}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  width:30px;height:30px;border-radius:50%;
+  background:var(--bg2);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--mu);font-size:.85rem;transition:all .2s;
+}
+.modal-close:hover{background:var(--rp);color:var(--r2)}
+.qr-wrap{
+  background:white;border-radius:var(--rs);padding:16px;
+  margin:16px 0;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bd);
+}
+.qr-wrap canvas{display:block}
+.modal h3{font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--d2);margin-bottom:6px}
+.modal p{font-size:.83rem;color:var(--mu);line-height:1.55}
+.modal-btns{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+
+/* ═══════════ ALERT POPUP ═══════════ */
+.alert-popup{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:1000;background:var(--card);border-radius:20px;
+  padding:32px 36px;max-width:380px;width:90%;
+  box-shadow:0 24px 80px rgba(220,38,38,.3),0 0 0 3px rgba(220,38,38,.2);
+  display:none;text-align:center;
+  animation:shake .4s ease;
+}
+.alert-popup.open{display:block}
+.alert-popup-icon{font-size:3rem;margin-bottom:14px;display:block;animation:ringPulse 1s infinite}
+.alert-popup h3{font-family:var(--fh);font-size:1.2rem;font-weight:800;color:var(--r2);margin-bottom:8px}
+.alert-popup p{font-size:.86rem;color:var(--mu);margin-bottom:20px;line-height:1.55}
+
+/* ═══════════ TOAST ═══════════ */
+.toast-box{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--d2);color:#fff;padding:12px 16px;border-radius:var(--rs);font-size:.82rem;font-weight:500;box-shadow:0 8px 28px rgba(0,0,0,.35);display:flex;align-items:center;gap:9px;min-width:250px;max-width:320px;pointer-events:auto;animation:toastIn .3s ease}
+.toast i{flex-shrink:0}
+.toast.t-ok{border-left:3px solid var(--g4)}
+.toast.t-er{border-left:3px solid var(--r3)}
+.toast.t-wa{border-left:3px solid var(--a3)}
+.toast.t-in{border-left:3px solid var(--b4)}
+
+/* ═══════════ HISTORY ═══════════ */
+.hrow{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--bd2)}
+.hrow:last-child{border-bottom:none}
+.hav{width:35px;height:35px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff}
+.hinfo{flex:1;min-width:0}
+.hname{font-size:.83rem;font-weight:600;color:var(--d2)}
+.hmeta{font-size:.72rem;color:var(--mu);margin-top:2px;display:flex;flex-wrap:wrap;gap:8px}
+.hmeta i{font-size:.67rem;color:var(--b3)}
+
+/* ═══════════ MINI ROW (dashboard) ═══════════ */
+.mrow{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--bd2)}
+.mrow:last-child{border-bottom:none}
+.mav{width:31px;height:31px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff}
+.minfo{flex:1;min-width:0}
+.mname{font-size:.82rem;font-weight:600;color:var(--d2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msub{font-size:.71rem;color:var(--mu);margin-top:1px}
+
+/* ═══════════ FILTER ═══════════ */
+.fbar{display:flex;gap:9px;margin-bottom:15px;flex-wrap:wrap}
+.fbar select{padding:6px 11px;border-radius:var(--rs);border:1.5px solid var(--bd);background:var(--card);font-size:.8rem;color:var(--tx);cursor:pointer}
+.fbar select:focus{outline:none;border-color:var(--b3)}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:900px){.dgrid{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .sidebar-ov.open{display:block}.main{margin-left:0}
+  .hbtn{display:block}.pw{padding:14px}.frow{grid-template-columns:1fr}
+  .sgrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){.sgrid{grid-template-columns:1fr}.login-box{padding:30px 22px}}
+</style>
+</head>
+<body>
+
+<!-- Toast container -->
+<div class="toast-box" id="toastBox"></div>
+
+<!-- Alert popup -->
+<div class="alert-popup" id="alertPopup">
+  <span class="alert-popup-icon">🚨</span>
+  <h3 id="alertTitle">Time Exceeded!</h3>
+  <p id="alertMsg">A student has not returned to class within the allotted time.</p>
+  <button class="btn br" onclick="closeAlert()" style="width:100%"><i class="fa-solid fa-xmark"></i> Dismiss</button>
+</div>
+
+<!-- QR Modal -->
+<div class="modal-ov" id="qrModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeQR()"><i class="fa-solid fa-xmark"></i></button>
+    <h3 id="qrTitle">Pass QR Code</h3>
+    <p id="qrSubtitle">Show this QR to the teacher or scan to exit/return</p>
+    <div class="qr-wrap"><canvas id="qrCanvas" width="200" height="200"></canvas></div>
+    <div id="qrPassInfo" style="font-size:.8rem;color:var(--mu);text-align:center;margin-bottom:4px"></div>
+    <div class="modal-btns">
+      <button class="btn bg" id="qrScanBtn" style="flex:1" onclick="simulateScan()"><i class="fa-solid fa-qrcode"></i> Scan to Return</button>
+      <button class="btn bo" onclick="closeQR()" style="flex:1"><i class="fa-solid fa-xmark"></i> Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar overlay -->
+<div class="sidebar-ov" id="sbOv" onclick="closeSB()"></div>
+
+<!-- ══════════════════════════════════
+     LOGIN PAGE
+══════════════════════════════════ -->
+<div id="loginPage">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="logo-icon-big">🪪</div>
+        <h1>DigiPass</h1>
+        <p>Digital Classroom Pass System</p>
+      </div>
+      <p class="lbl" style="margin-bottom:10px">Quick Demo Login</p>
+      <div class="demo-row">
+        <div class="demo-card sel" id="dT" onclick="selDemo('teacher')">
+          <span class="dem-ico">👩‍🏫</span>
+          <div class="dem-role">Teacher</div>
+          <div class="dem-cred">teacher / pass123</div>
+        </div>
+        <div class="demo-card" id="dS" onclick="selDemo('student')">
+          <span class="dem-ico">🎓</span>
+          <div class="dem-role">Student</div>
+          <div class="dem-cred">student / pass123</div>
+        </div>
+      </div>
+      <div class="login-err" id="lerr"><i class="fa-solid fa-circle-exclamation"></i><span id="lerrmsg"></span></div>
+      <div class="lbl">Username</div>
+      <div class="inp-wrap">
+        <i class="fa-solid fa-user ico"></i>
+        <input class="inp" id="luser" value="teacher" placeholder="Username"/>
+      </div>
+      <div class="lbl">Password</div>
+      <div class="inp-wrap">
+        <i class="fa-solid fa-lock ico"></i>
+        <input class="inp" id="lpass" type="password" value="pass123" placeholder="Password"/>
+      </div>
+      <button class="btn-lg" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket"></i> Login to Dashboard</button>
+      <div class="login-foot">All data stored in your browser · No internet required after fonts load</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     APP PAGE
+══════════════════════════════════ -->
+<div id="appPage">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-ic">🪪</div>
+      <div><div class="sb-logo-t">DigiPass</div><div class="sb-logo-s">Pass Management</div></div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av" id="sbAv"></div>
+      <div style="flex:1;min-width:0">
+        <div class="sb-un" id="sbName"></div>
+        <div id="sbBadge"></div>
+      </div>
+    </div>
+    <nav class="sb-nav" id="sbNav"></nav>
+    <div class="sb-bottom">
+      <button class="btn-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-l">
+        <button class="hbtn" onclick="openSB()"><i class="fa-solid fa-bars"></i></button>
+        <div class="tb-title" id="tbTitle">Dashboard</div>
+      </div>
+      <div class="tb-r">
+        <span class="tb-time" id="tbTime"></span>
+        <div class="tb-live"><div class="ld"></div>Live System</div>
+        <button class="btn bo bsm" onclick="resetSystem()" title="Reset all data"><i class="fa-solid fa-rotate-left"></i></button>
+      </div>
+    </div>
+    <div class="pw">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="panel active" id="pDash">
+        <div style="margin-bottom:22px">
+          <h2 id="dashG" style="font-family:var(--fh);font-size:1.35rem;font-weight:800;color:var(--d2)"></h2>
+          <p id="dashD" style="font-size:.86rem;color:var(--mu);margin-top:4px"></p>
+        </div>
+        <div class="sgrid" id="dashStats"></div>
+        <div class="dgrid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <div class="card">
+            <div class="ch"><div class="ct"><i class="fa-solid fa-clock-rotate-left"></i>Recent Requests</div></div>
+            <div id="dashRec"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ct"><i class="fa-solid fa-person-walking"></i>Currently Outside</div></div>
+            <div id="dashOut"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px" id="dashActs"></div>
+      </div>
+
+      <!-- ── STUDENT: REQUEST ── -->
+      <div class="panel" id="pReq">
+        <div class="banner bn-blue"><h2>🎫 Request a Pass</h2><p>Submit your pass request and track approval status in real time</p></div>
+        <div id="myActiveBanner"></div>
+        <div class="card" id="reqForm">
+          <div class="ct" style="margin-bottom:18px"><i class="fa-solid fa-pen-to-square"></i>New Pass Request</div>
+          <div class="frow">
+            <div class="field"><label>Your Name</label><input id="rName" placeholder="Full name"/></div>
+            <div class="field">
+              <label>Destination</label>
+              <select id="rDest">
+                <option value="">— Select —</option>
+                <option>Washroom</option><option>Library</option>
+                <option>School Office</option><option>Nurse / Medical Room</option>
+                <option>Canteen</option><option>Principal's Office</option>
+                <option>Attendance</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Reason (optional)</label><input id="rReason" placeholder="Brief reason..."/></div>
+          <button class="btn bp" onclick="submitReq()"><i class="fa-solid fa-paper-plane"></i>Submit Request</button>
+        </div>
+        <div class="card">
+          <div class="ct"><i class="fa-solid fa-list-check"></i>My Pass History</div>
+          <div id="myHist"></div>
+        </div>
+      </div>
+
+      <!-- ── TEACHER: REQUESTS ── -->
+      <div class="panel" id="pTReq">
+        <div class="banner bn-green"><h2>📋 Student Requests</h2><p>Review and approve or reject incoming pass requests</p></div>
+        <div class="card">
+          <div class="ch">
+            <div class="ct"><i class="fa-solid fa-inbox"></i>Pending Requests <span class="tag t-pend" id="pendTag" style="margin-left:6px"></span></div>
+            <button class="btn bo bsm" onclick="renderTReq()"><i class="fa-solid fa-rotate"></i>Refresh</button>
+          </div>
+          <div class="twrap"><table class="dtbl"><thead><tr><th>Student</th><th>Destination</th><th>Requested</th><th>Reason</th><th>Action</th></tr></thead><tbody id="pendTb"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ct" style="margin-bottom:18px"><i class="fa-solid fa-table-list"></i>All Requests</div>
+          <div class="twrap"><table class="dtbl"><thead><tr><th>Student</th><th>Destination</th><th>Time</th><th>Status</th><th>Duration</th></tr></thead><tbody id="allTb"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── LIVE TRACKING ── -->
+      <div class="panel" id="pTrack">
+        <div class="banner bn-dark"><h2>📡 Live Tracking</h2><p>Real-time countdown timers for all students currently outside</p></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <div>
+            <span id="outCount" style="font-family:var(--fh);font-size:1.4rem;font-weight:800;color:var(--b2)">0</span>
+            <span style="font-size:.85rem;color:var(--mu);margin-left:4px">student(s) currently outside</span>
+          </div>
+          <button class="btn bo bsm" onclick="renderTrack()"><i class="fa-solid fa-rotate"></i>Refresh</button>
+        </div>
+        <div class="tgrid" id="tGrid"></div>
+        <div id="tEmpty"></div>
+      </div>
+
+      <!-- ── HISTORY ── -->
+      <div class="panel" id="pHist">
+        <div class="banner bn-teal"><h2>📜 Pass History</h2><p>Complete record of all pass activity with timestamps and durations</p></div>
+        <div class="card">
+          <div class="ch">
+            <div class="ct"><i class="fa-solid fa-clock-rotate-left"></i>All Records</div>
+            <div class="fbar" style="margin-bottom:0">
+              <select id="hfStatus" onchange="renderHist()"><option value="all">All Status</option><option value="returned">Returned</option><option value="exceeded">Exceeded</option><option value="rejected">Rejected</option></select>
+              <select id="hfDest" onchange="renderHist()">
+                <option value="all">All Destinations</option>
+                <option>Washroom</option><option>Library</option><option>School Office</option>
+                <option>Nurse / Medical Room</option><option>Canteen</option><option>Attendance</option>
+              </select>
+              <button class="btn bo bsm" onclick="clearHF()"><i class="fa-solid fa-xmark"></i>Clear</button>
+            </div>
+          </div>
+          <div id="histList"></div>
+        </div>
+      </div>
+
+    </div><!-- end pw -->
+  </div><!-- end main -->
+</div><!-- end appPage -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONSTANTS & HELPERS
+══════════════════════════════════════════════════════ */
+const PASS_DURATION = 10 * 60; // 10 minutes in seconds
+const WARN_AT       = 2 * 60;  // warn at 2 minutes remaining
+const DEMO_USERS    = {
+  teacher: {pass:'pass123',role:'teacher',name:'Mrs. Anita Sharma'},
+  student: {pass:'pass123',role:'student',name:'Rohit Verma'}
+};
+const AV_COLORS = ['#1248B3','#166534','#0D9488','#6D28D9','#B45309','#B91C1C','#0369A1','#9D174D'];
+
+function avColor(s){ let n=0; for(let c of s) n+=c.charCodeAt(0); return AV_COLORS[n%AV_COLORS.length]; }
+function avClass(s){ let n=0; for(let c of s) n+=c.charCodeAt(0); return 'av'+((n%8)+1); }
+function inits(s){ return s.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function fmtTime(ts){ return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString([],{day:'2-digit',month:'short',year:'numeric'}); }
+function timeAgo(ts){
+  const m=Math.floor((Date.now()-ts)/60000);
+  if(m<1) return 'just now'; if(m<60) return m+'m ago';
+  return Math.floor(m/60)+'h '+m%60+'m ago';
+}
+function mmss(sec){
+  const s=Math.max(0,sec);
+  return (Math.floor(s/60)<10?'0':'')+Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+}
+function durStr(a,b){
+  if(!a||!b) return '—';
+  const m=Math.round((b-a)/60000);
+  return m+'m';
+}
+function nextId(){
+  const p=getPasses();
+  return p.length ? Math.max(...p.map(x=>x.id))+1 : 1;
+}
+
+/* ══════════════════════════════════════════════════════
+   DATA STORE
+══════════════════════════════════════════════════════ */
+function getPasses(){ return JSON.parse(localStorage.getItem('dp_passes')||'[]'); }
+function savePasses(p){ localStorage.setItem('dp_passes',JSON.stringify(p)); }
+
+function seedData(){
+  if(getPasses().length) return;
+  const now=Date.now();
+  savePasses([
+    {id:1,student:'Priya Kaur',dest:'Library',reason:'Reference book',ts:now-30*60000,status:'approved',tOut:now-28*60000,tIn:null,exceeded:false},
+    {id:2,student:'Sneha Patel',dest:'School Office',reason:'Fee',ts:now-50*60000,status:'returned',tOut:now-48*60000,tIn:now-25*60000,exceeded:false},
+    {id:3,student:'Karan Singh',dest:'Washroom',reason:'',ts:now-5*60000,status:'pending',tOut:null,tIn:null,exceeded:false},
+    {id:4,student:'Meera Joshi',dest:'Attendance',reason:'',ts:now-8*60000,status:'approved',tOut:now-8*60000,tIn:null,exceeded:false},
+  ]);
+}
+
+/* ══════════════════════════════════════════════════════
+   AUDIO SYSTEM
+══════════════════════════════════════════════════════ */
+let audioCtx = null;
+function getAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function beep(freq=440,dur=0.3,vol=0.3,type='sine'){
+  try{
+    const ctx=getAudio();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value=freq; osc.type=type;
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function alarmSound(){
+  beep(880,0.15,0.4,'square');
+  setTimeout(()=>beep(660,0.15,0.4,'square'),200);
+  setTimeout(()=>beep(880,0.15,0.4,'square'),400);
+  setTimeout(()=>beep(440,0.3,0.4,'square'),600);
+}
+function warnSound(){
+  beep(660,0.2,0.3,'sine');
+  setTimeout(()=>beep(550,0.2,0.3,'sine'),300);
+}
+
+/* ══════════════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════════════ */
+let CU = JSON.parse(sessionStorage.getItem('dp_cu')||'null');
+
+function selDemo(r){
+  document.getElementById('dT').classList.toggle('sel',r==='teacher');
+  document.getElementById('dS').classList.toggle('sel',r==='student');
+  document.getElementById('luser').value=r;
+  document.getElementById('lpass').value='pass123';
+}
+function doLogin(){
+  const u=document.getElementById('luser').value.trim().toLowerCase();
+  const p=document.getElementById('lpass').value.trim();
+  const err=document.getElementById('lerr');
+  if(!DEMO_USERS[u]||DEMO_USERS[u].pass!==p){
+    err.style.display='flex';
+    document.getElementById('lerrmsg').textContent='Invalid credentials. Use teacher/pass123 or student/pass123';
+    return;
+  }
+  err.style.display='none';
+  CU={...DEMO_USERS[u],username:u};
+  sessionStorage.setItem('dp_cu',JSON.stringify(CU));
+  seedData();
+  showApp();
+}
+function doLogout(){
+  stopMasterTimer();
+  CU=null;
+  sessionStorage.removeItem('dp_cu');
+  document.getElementById('appPage').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  toast('Logged out','t-in');
+}
+
+/* ══════════════════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════════════════ */
+let masterTimer=null;
+let clockTimer=null;
+let alerted={};   // track which pass IDs have triggered alerts
+
+function showApp(){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('appPage').style.display='block';
+  buildSB();
+  startClock();
+  startMasterTimer();
+  navTo('pDash');
+}
+
+function buildSB(){
+  const u=CU;
+  const av=document.getElementById('sbAv');
+  av.textContent=inits(u.name);
+  av.className='sb-av '+(u.role==='teacher'?'av-t':'av-s');
+  document.getElementById('sbName').textContent=u.name;
+  document.getElementById('sbBadge').innerHTML=
+    `<span class="sb-rb ${u.role==='teacher'?'rb-t':'rb-s'}">${u.role==='teacher'?'👩‍🏫 Teacher':'🎓 Student'}</span>`;
+
+  const tNav=[
+    {i:'fa-gauge',l:'Dashboard',p:'pDash'},
+    {i:'fa-clipboard-list',l:'Student Requests',p:'pTReq',badge:true},
+    {i:'fa-satellite-dish',l:'Live Tracking',p:'pTrack'},
+    {i:'fa-clock-rotate-left',l:'Pass History',p:'pHist'},
+  ];
+  const sNav=[
+    {i:'fa-gauge',l:'Dashboard',p:'pDash'},
+    {i:'fa-ticket',l:'Request Pass',p:'pReq'},
+    {i:'fa-satellite-dish',l:'Live Tracking',p:'pTrack'},
+    {i:'fa-clock-rotate-left',l:'My History',p:'pHist'},
+  ];
+  const items=u.role==='teacher'?tNav:sNav;
+  document.getElementById('sbNav').innerHTML=
+    '<div class="sb-sec">Navigation</div>'+
+    items.map(n=>`
+      <div class="sb-item" id="sbi_${n.p}" onclick="navTo('${n.p}')">
+        <i class="fa-solid ${n.i} si"></i>${n.l}
+        ${n.badge?`<span class="sb-badge" id="pendBadge" style="display:none">0</span>`:''}
+      </div>`).join('');
+  updateBadge();
+}
+
+function updateBadge(){
+  const b=document.getElementById('pendBadge');
+  if(!b) return;
+  const c=getPasses().filter(p=>p.status==='pending').length;
+  b.textContent=c; b.style.display=c?'inline':'none';
+}
+
+function navTo(pid){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById(pid).classList.add('active');
+  const sbi=document.getElementById('sbi_'+pid);
+  if(sbi){ sbi.classList.add('active'); document.getElementById('tbTitle').textContent=sbi.textContent.trim(); }
+  if(pid==='pDash')  renderDash();
+  if(pid==='pReq')   renderStudentReq();
+  if(pid==='pTReq')  renderTReq();
+  if(pid==='pTrack') renderTrack();
+  if(pid==='pHist')  renderHist();
+  closeSB();
+  window.scrollTo(0,0);
+}
+
+function startClock(){
+  clearInterval(clockTimer);
+  const upd=()=>{ const el=document.getElementById('tbTime'); if(el) el.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}); };
+  upd(); clockTimer=setInterval(upd,1000);
+}
+
+/* ══════════════════════════════════════════════════════
+   MASTER TIMER ENGINE
+   Runs every second, updates all timers & triggers alerts
+══════════════════════════════════════════════════════ */
+function startMasterTimer(){
+  stopMasterTimer();
+  masterTimer=setInterval(masterTick,1000);
+}
+function stopMasterTimer(){ clearInterval(masterTimer); }
+
+function masterTick(){
+  const passes=getPasses();
+  let changed=false;
+  const now=Date.now();
+
+  passes.forEach(p=>{
+    if(p.status!=='approved') return;
+    const elapsed=Math.floor((now-p.tOut)/1000);
+    const remaining=PASS_DURATION-elapsed;
+
+    // Warn at 2 min left
+    if(remaining===WARN_AT && !alerted[p.id+'_warn']){
+      alerted[p.id+'_warn']=true;
+      warnSound();
+      toast(`⚠️ ${p.student} — 2 minutes left!`,'t-wa');
+    }
+    // Time exceeded
+    if(remaining<=0 && !p.exceeded){
+      p.exceeded=true;
+      p.status='exceeded';
+      p.tIn=p.tOut+PASS_DURATION*1000;
+      changed=true;
+      alerted[p.id+'_exceed']=true;
+      alarmSound();
+      showAlert('Time Exceeded!',`${p.student} has not returned from ${p.dest}. Please check immediately.`);
+      toast(`🚨 ${p.student} exceeded time!`,'t-er');
+    }
+  });
+
+  if(changed) savePasses(passes);
+
+  // Update live timer displays without full re-render
+  const active=getPasses().filter(p=>p.status==='approved');
+  active.forEach(p=>{
+    const elapsed=Math.floor((Date.now()-p.tOut)/1000);
+    const remaining=Math.max(0,PASS_DURATION-elapsed);
+    const pct=(remaining/PASS_DURATION)*100;
+
+    const valEl=document.getElementById('tv_'+p.id);
+    const barEl=document.getElementById('tb_'+p.id);
+    const cardEl=document.getElementById('tc_'+p.id);
+
+    if(valEl){
+      valEl.textContent=mmss(remaining);
+      if(remaining<=WARN_AT && remaining>0){
+        valEl.className='timer-val warn';
+        if(barEl){ barEl.className='timer-bar-fill warn'; barEl.style.width=pct+'%'; }
+        if(cardEl){ cardEl.className='tcard warn'; }
+      } else {
+        valEl.className='timer-val';
+        if(barEl){ barEl.className='timer-bar-fill'; barEl.style.width=pct+'%'; }
+        if(cardEl){ cardEl.className='tcard'; }
+      }
+    }
+  });
+
+  // Check if any exceeded — re-render tracking if so
+  if(changed){
+    if(document.getElementById('pTrack').classList.contains('active')) renderTrack();
+    if(document.getElementById('pDash').classList.contains('active')) renderDash();
+    updateBadge();
+  }
+
+  updateBadge();
+}
+
+/* ══════════════════════════════════════════════════════
+   ALERT POPUP
+══════════════════════════════════════════════════════ */
+function showAlert(title,msg){
+  document.getElementById('alertTitle').textContent=title;
+  document.getElementById('alertMsg').textContent=msg;
+  document.getElementById('alertPopup').classList.add('open');
+  document.getElementById('alertPopup').style.display='block';
+}
+function closeAlert(){
+  document.getElementById('alertPopup').classList.remove('open');
+  document.getElementById('alertPopup').style.display='none';
+}
+
+/* ══════════════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════════════ */
+function renderDash(){
+  const h=new Date().getHours();
+  const g=h<12?'Good Morning':h<17?'Good Afternoon':'Good Evening';
+  document.getElementById('dashG').textContent=g+', '+CU.name.split(' ')[0]+'! 👋';
+  document.getElementById('dashD').textContent='Live overview of classroom pass activity — '+new Date().toLocaleDateString([],{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const passes=getPasses();
+  const active=passes.filter(p=>p.status==='approved').length;
+  const pend=passes.filter(p=>p.status==='pending').length;
+  const ret=passes.filter(p=>p.status==='returned'||p.status==='exceeded').length;
+  document.getElementById('dashStats').innerHTML=[
+    {v:active,l:'Currently Outside',ic:'ic-b',i:'fa-location-dot'},
+    {v:pend,  l:'Pending Requests', ic:'ic-a',i:'fa-clock'},
+    {v:ret,   l:'Completed Today',  ic:'ic-g',i:'fa-circle-check'},
+    {v:passes.length,l:'Total Passes',ic:'ic-r',i:'fa-ticket'},
+  ].map(s=>`<div class="sc"><div class="sc-ic ${s.ic}"><i class="fa-solid ${s.i}"></i></div><div><div class="sc-v">${s.v}</div><div class="sc-l">${s.l}</div></div></div>`).join('');
+
+  const rec=[...passes].sort((a,b)=>b.ts-a.ts).slice(0,5);
+  document.getElementById('dashRec').innerHTML=rec.length?
+    rec.map(p=>`<div class="mrow"><div class="mav ${avClass(p.student)}">${inits(p.student)}</div><div class="minfo"><div class="mname">${p.student}</div><div class="msub">📍 ${p.dest} · ${timeAgo(p.ts)}</div></div><span class="tag t-${p.status.slice(0,4)}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></div>`).join(''):
+    `<div class="empty"><i class="fa-regular fa-folder-open"></i><p>No activity yet</p></div>`;
+
+  const out=passes.filter(p=>p.status==='approved');
+  document.getElementById('dashOut').innerHTML=out.length?
+    out.map(p=>`<div class="mrow"><div class="mav ${avClass(p.student)}">${inits(p.student)}</div><div class="minfo"><div class="mname">${p.student}</div><div class="msub">${p.dest} · out ${p.tOut?fmtTime(p.tOut):'—'}</div></div><span class="tag t-act">Out</span></div>`).join(''):
+    `<div class="empty" style="padding:24px 0"><i class="fa-solid fa-circle-check" style="color:var(--g3);opacity:.5"></i><p style="color:var(--g3);font-weight:600">All students in class</p></div>`;
+
+  document.getElementById('dashActs').innerHTML=CU.role==='teacher'?
+    `<button class="btn bp" onclick="navTo('pTReq')"><i class="fa-solid fa-clipboard-list"></i>Manage Requests</button>
+     <button class="btn bg" onclick="navTo('pTrack')"><i class="fa-solid fa-satellite-dish"></i>Live Tracking</button>
+     <button class="btn bo" onclick="navTo('pHist')"><i class="fa-solid fa-clock-rotate-left"></i>History</button>`:
+    `<button class="btn bp" onclick="navTo('pReq')"><i class="fa-solid fa-ticket"></i>Request Pass</button>
+     <button class="btn bg" onclick="navTo('pTrack')"><i class="fa-solid fa-satellite-dish"></i>Live Tracking</button>
+     <button class="btn bo" onclick="navTo('pHist')"><i class="fa-solid fa-clock-rotate-left"></i>History</button>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   STUDENT PANEL
+══════════════════════════════════════════════════════ */
+function renderStudentReq(){
+  const passes=getPasses();
+  const myActive=passes.find(p=>p.student===CU.name&&(p.status==='pending'||p.status==='approved'));
+  const form=document.getElementById('reqForm');
+  const banner=document.getElementById('myActiveBanner');
+
+  if(myActive){
+    form.style.display='none';
+    const ip=myActive.status==='pending';
+    const ia=myActive.status==='approved';
+    const cls=ip?'stb-pend':'stb-app';
+    const ico=ip?'fa-clock':'fa-circle-check';
+    const head=ip?'Request Pending — Awaiting Teacher Approval':'Pass Approved — You Are Currently Outside';
+    const msg=ip?`Waiting for approval to visit <strong>${myActive.dest}</strong>.`:`Active pass for <strong>${myActive.dest}</strong>. Return to class when done.`;
+    const elapsed=ia?Math.floor((Date.now()-myActive.tOut)/1000):0;
+    const rem=Math.max(0,PASS_DURATION-elapsed);
+    banner.innerHTML=`
+      <div class="stbanner ${cls}">
+        <div class="stb-ico"><i class="fa-solid ${ico}"></i></div>
+        <div class="stb-txt" style="flex:1">
+          <h4>${head}</h4>
+          <p>${msg}${ia?` &nbsp;|&nbsp; ⏱ <strong>${mmss(rem)}</strong> remaining`:''}</p>
+        </div>
+        ${ia?`<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
+          <button class="btn bg bsm" onclick="showQR(${myActive.id})"><i class="fa-solid fa-qrcode"></i>QR</button>
+          <button class="btn br bsm" onclick="returnSelf(${myActive.id})"><i class="fa-solid fa-right-to-bracket"></i>Return</button>
+        </div>`:''}
+      </div>`;
+  } else {
+    form.style.display='block';
+    banner.innerHTML='';
+    document.getElementById('rName').value=CU.name;
+  }
+
+  const myHist=passes.filter(p=>p.student===CU.name&&p.status!=='pending'&&p.status!=='approved').reverse();
+  document.getElementById('myHist').innerHTML=myHist.length?
+    myHist.map(p=>`
+      <div class="hrow">
+        <div class="hav" style="background:${avColor(p.dest)}">${p.dest.slice(0,2).toUpperCase()}</div>
+        <div class="hinfo">
+          <div class="hname">${p.dest}</div>
+          <div class="hmeta">
+            <span><i class="fa-solid fa-arrow-right-from-bracket"></i> Out: ${p.tOut?fmtTime(p.tOut):'—'}</span>
+            <span><i class="fa-solid fa-arrow-right-to-bracket"></i> In: ${p.tIn?fmtTime(p.tIn):'—'}</span>
+            ${p.reason?`<span><i class="fa-solid fa-comment-dots"></i>${p.reason}</span>`:''}
+            <span><i class="fa-solid fa-calendar"></i>${fmtDate(p.ts)}</span>
+          </div>
+        </div>
+        <span class="tag t-${p.status.slice(0,4)}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span>
+      </div>`).join(''):
+    `<div class="empty"><i class="fa-regular fa-clock"></i><p>No pass history yet</p></div>`;
+}
+
+function submitReq(){
+  const name=document.getElementById('rName').value.trim();
+  const dest=document.getElementById('rDest').value;
+  const reason=document.getElementById('rReason').value.trim();
+  if(!name){ toast('Enter your name','t-er'); return; }
+  if(!dest){ toast('Select a destination','t-er'); return; }
+
+  const passes=getPasses();
+  if(passes.find(p=>p.student===name&&(p.status==='pending'||p.status==='approved'))){
+    toast('You already have an active pass!','t-wa'); return;
+  }
+
+  const np={id:nextId(),student:name,dest,reason,ts:Date.now(),status:'pending',tOut:null,tIn:null,exceeded:false};
+
+  // Auto-approve Attendance
+  if(dest==='Attendance'){
+    np.status='approved';
+    np.tOut=Date.now();
+    passes.push(np);
+    savePasses(passes);
+    toast('✅ Attendance pass auto-approved!','t-ok');
+    alerted[np.id+'_warn']=false;
+  } else {
+    passes.push(np);
+    savePasses(passes);
+    toast('📨 Request submitted! Waiting for approval.','t-in');
+  }
+
+  document.getElementById('rDest').value='';
+  document.getElementById('rReason').value='';
+  renderStudentReq();
+  updateBadge();
+}
+
+function returnSelf(id){
+  const passes=getPasses();
+  const p=passes.find(x=>x.id===id&&x.status==='approved');
+  if(!p){ toast('Pass not found','t-er'); return; }
+  p.status='returned'; p.tIn=Date.now();
+  savePasses(passes);
+  toast('✅ Welcome back! Pass closed.','t-ok');
+  beep(550,0.3,0.25,'sine');
+  renderStudentReq();
+  if(document.getElementById('pTrack').classList.contains('active')) renderTrack();
+}
+
+/* ══════════════════════════════════════════════════════
+   TEACHER PANEL
+══════════════════════════════════════════════════════ */
+function renderTReq(){
+  const passes=getPasses();
+  const pend=passes.filter(p=>p.status==='pending');
+  const all=[...passes].sort((a,b)=>b.ts-a.ts);
+
+  const pt=document.getElementById('pendTag');
+  if(pt) pt.textContent=pend.length?pend.length+' pending':'None';
+
+  document.getElementById('pendTb').innerHTML=pend.length?
+    pend.map(p=>`
+      <tr>
+        <td><div class="swrap"><div class="sav ${avClass(p.student)}">${inits(p.student)}</div><strong>${p.student}</strong></div></td>
+        <td><i class="fa-solid fa-location-dot" style="color:var(--b3);font-size:.75rem"></i> ${p.dest}</td>
+        <td style="color:var(--mu);font-size:.79rem">${fmtTime(p.ts)}</td>
+        <td style="color:var(--mu);font-size:.79rem">${p.reason||'—'}</td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn bg bsm" onclick="approveP(${p.id})"><i class="fa-solid fa-check"></i>Approve</button>
+            <button class="btn br bsm" onclick="rejectP(${p.id})"><i class="fa-solid fa-xmark"></i>Reject</button>
+          </div>
+        </td>
+      </tr>`).join(''):
+    `<tr><td colspan="5"><div class="empty"><i class="fa-solid fa-inbox"></i><p>No pending requests</p></div></td></tr>`;
+
+  document.getElementById('allTb').innerHTML=all.length?
+    all.map(p=>`
+      <tr>
+        <td><div class="swrap"><div class="sav ${avClass(p.student)}">${inits(p.student)}</div>${p.student}</div></td>
+        <td>${p.dest}</td>
+        <td style="font-size:.79rem;color:var(--mu)">${fmtTime(p.ts)}</td>
+        <td><span class="tag t-${p.status.slice(0,4)}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></td>
+        <td style="font-size:.79rem;color:var(--mu)">${durStr(p.tOut,p.tIn)}</td>
+      </tr>`).join(''):
+    `<tr><td colspan="5"><div class="empty"><i class="fa-solid fa-table-list"></i><p>No records</p></div></td></tr>`;
+}
+
+function approveP(id){
+  const passes=getPasses();
+  const p=passes.find(x=>x.id===id&&x.status==='pending');
+  if(!p) return;
+  p.status='approved'; p.tOut=Date.now();
+  alerted[id+'_warn']=false;
+  savePasses(passes);
+  beep(660,0.2,0.3,'sine');
+  toast(`✅ ${p.student}'s pass approved`,'t-ok');
+  renderTReq(); updateBadge();
+}
+function rejectP(id){
+  const passes=getPasses();
+  const p=passes.find(x=>x.id===id&&x.status==='pending');
+  if(!p) return;
+  p.status='rejected';
+  savePasses(passes);
+  beep(330,0.3,0.3,'sawtooth');
+  toast(`❌ ${p.student}'s pass rejected`,'t-er');
+  renderTReq(); updateBadge();
+}
+function markReturned(id){
+  const passes=getPasses();
+  const p=passes.find(x=>x.id===id&&x.status==='approved');
+  if(!p) return;
+  p.status='returned'; p.tIn=Date.now();
+  savePasses(passes);
+  beep(550,0.3,0.25,'sine');
+  toast(`${p.student} marked as returned`,'t-ok');
+  renderTrack();
+}
+
+/* ══════════════════════════════════════════════════════
+   LIVE TRACKING
+══════════════════════════════════════════════════════ */
+function renderTrack(){
+  const active=getPasses().filter(p=>p.status==='approved');
+  document.getElementById('outCount').textContent=active.length;
+  const grid=document.getElementById('tGrid');
+  const empty=document.getElementById('tEmpty');
+
+  if(!active.length){
+    grid.innerHTML='';
+    empty.innerHTML=`
+      <div style="text-align:center;padding:80px 20px">
+        <div style="font-size:4rem;margin-bottom:16px">✅</div>
+        <h3 style="font-family:var(--fh);color:var(--g3);font-size:1.2rem;margin-bottom:8px">All students are in class</h3>
+        <p style="color:var(--mu);font-size:.87rem">No active passes at the moment.</p>
+      </div>`;
+    return;
+  }
+  empty.innerHTML='';
+
+  grid.innerHTML=active.map(p=>{
+    const elapsed=Math.floor((Date.now()-p.tOut)/1000);
+    const rem=Math.max(0,PASS_DURATION-elapsed);
+    const pct=(rem/PASS_DURATION)*100;
+    const isWarn=rem<=WARN_AT && rem>0;
+    const cardCls=isWarn?'tcard warn':'tcard';
+    const timerCls=isWarn?'timer-val warn':'timer-val';
+    const barCls=isWarn?'timer-bar-fill warn':'timer-bar-fill';
+
+    return `
+      <div class="${cardCls}" id="tc_${p.id}">
+        <div class="tc-head">
+          <div class="tc-av ${avClass(p.student)}">${inits(p.student)}</div>
+          <div>
+            <div class="tc-name">${p.student}</div>
+            <div class="tc-sub">Pass #${p.id} · ${fmtTime(p.tOut)}</div>
+          </div>
+        </div>
+        <div class="tc-row"><i class="fa-solid fa-location-dot"></i><span>${p.dest}</span></div>
+        <div class="tc-row"><i class="fa-solid fa-clock"></i><span>Left at ${fmtTime(p.tOut)}</span></div>
+        ${p.reason?`<div class="tc-row"><i class="fa-solid fa-comment-dots"></i><span>${p.reason}</span></div>`:''}
+        <div class="tc-foot">
+          <div class="timer-display">
+            <div class="${timerCls}" id="tv_${p.id}">${mmss(rem)}</div>
+            <div class="timer-lbl">${isWarn?'⚠️ Return soon!':'Time remaining'}</div>
+            <div class="timer-bar">
+              <div class="${barCls}" id="tb_${p.id}" style="width:${pct}%"></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <button class="btn bg bsm" onclick="showQR(${p.id})"><i class="fa-solid fa-qrcode"></i>QR Code</button>
+            ${CU.role==='teacher'?`<button class="btn bo bsm" onclick="markReturned(${p.id})"><i class="fa-solid fa-right-to-bracket"></i>Return</button>`:''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   QR CODE SYSTEM
+══════════════════════════════════════════════════════ */
+let qrPassId=null;
+
+function showQR(id){
+  const passes=getPasses();
+  const p=passes.find(x=>x.id===id);
+  if(!p) return;
+  qrPassId=id;
+
+  document.getElementById('qrTitle').textContent=`Pass QR — ${p.student}`;
+  document.getElementById('qrSubtitle').textContent=`Destination: ${p.dest} · Issued: ${fmtTime(p.ts)}`;
+  document.getElementById('qrPassInfo').textContent=`Pass ID: #${p.id} · Status: ${p.status.toUpperCase()}`;
+
+  drawQR(id,p);
+  document.getElementById('qrModal').classList.add('open');
+  beep(440,0.15,0.2,'sine');
+}
+
+function drawQR(id,p){
+  const canvas=document.getElementById('qrCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=200; canvas.height=200;
+
+  // Simple visual QR simulation
+  ctx.fillStyle='#ffffff';
+  ctx.fillRect(0,0,200,200);
+
+  const data=`DIGIPASS:${id}:${p.student}:${p.dest}:${p.ts}`;
+  // Use a deterministic pattern based on data
+  const seed=Array.from(data).reduce((a,c)=>a+c.charCodeAt(0),0);
+
+  ctx.fillStyle='#1248B3';
+  // Position markers
+  [[0,0],[143,0],[0,143]].forEach(([x,y])=>{
+    ctx.fillRect(x+5,y+5,50,50);
+    ctx.fillStyle='#fff';
+    ctx.fillRect(x+12,y+12,36,36);
+    ctx.fillStyle='#1248B3';
+    ctx.fillRect(x+18,y+18,24,24);
+    ctx.fillStyle='#1248B3';
+  });
+
+  // Data pattern
+  let r=seed;
+  for(let row=0;row<25;row++){
+    for(let col=0;col<25;col++){
+      r=(r*1664525+1013904223)&0xFFFFFFFF;
+      const skip=(row<8&&col<8)||(row<8&&col>16)||(row>16&&col<8);
+      if(!skip && (r&1)){
+        ctx.fillStyle='#1248B3';
+        ctx.fillRect(5+col*7.6,5+row*7.6,6.5,6.5);
+      }
+    }
+  }
+
+  // Border
+  ctx.strokeStyle='#D4E4F7'; ctx.lineWidth=2;
+  ctx.strokeRect(1,1,198,198);
+}
+
+function simulateScan(){
+  if(!qrPassId) return;
+  const passes=getPasses();
+  const p=passes.find(x=>x.id===qrPassId&&x.status==='approved');
+  if(p){
+    p.status='returned'; p.tIn=Date.now();
+    savePasses(passes);
+    closeQR();
+    beep(660,0.2,0.3,'sine');
+    setTimeout(()=>beep(880,0.3,0.3,'sine'),250);
+    toast(`✅ QR Scanned — ${p.student} returned to class`,'t-ok');
+    if(document.getElementById('pReq').classList.contains('active')) renderStudentReq();
+    if(document.getElementById('pTrack').classList.contains('active')) renderTrack();
+    if(document.getElementById('pDash').classList.contains('active')) renderDash();
+  } else {
+    toast('Pass no longer active','t-wa');
+    closeQR();
+  }
+}
+
+function closeQR(){
+  document.getElementById('qrModal').classList.remove('open');
+  qrPassId=null;
+}
+
+/* ══════════════════════════════════════════════════════
+   HISTORY
+══════════════════════════════════════════════════════ */
+function renderHist(){
+  let passes=[...getPasses()].sort((a,b)=>b.ts-a.ts);
+  const fs=document.getElementById('hfStatus')?.value||'all';
+  const fd=document.getElementById('hfDest')?.value||'all';
+  if(fs!=='all') passes=passes.filter(p=>p.status===fs);
+  if(fd!=='all') passes=passes.filter(p=>p.dest===fd);
+  if(CU.role==='student') passes=passes.filter(p=>p.student===CU.name);
+  // Exclude pending/approved from history view
+  passes=passes.filter(p=>p.status!=='pending'&&p.status!=='approved');
+
+  const list=document.getElementById('histList');
+  list.innerHTML=passes.length?
+    passes.map(p=>`
+      <div class="hrow">
+        <div class="hav ${avClass(p.student)}">${inits(p.student)}</div>
+        <div class="hinfo">
+          <div class="hname">${p.student} ${CU.role==='teacher'?`<span style="font-weight:400;color:var(--mu);font-size:.8rem">· ${p.dest}</span>`:''}</div>
+          <div class="hmeta">
+            ${CU.role==='student'?`<span><i class="fa-solid fa-location-dot"></i>${p.dest}</span>`:''}
+            <span><i class="fa-solid fa-arrow-right-from-bracket"></i>Out: ${p.tOut?fmtTime(p.tOut):'—'}</span>
+            <span><i class="fa-solid fa-arrow-right-to-bracket"></i>In: ${p.tIn?fmtTime(p.tIn):'—'}</span>
+            <span><i class="fa-solid fa-stopwatch"></i>${durStr(p.tOut,p.tIn)}</span>
+            ${p.reason?`<span><i class="fa-solid fa-comment-dots"></i>${p.reason}</span>`:''}
+            <span><i class="fa-solid fa-calendar"></i>${fmtDate(p.ts)}</span>
+          </div>
+        </div>
+        <span class="tag t-${p.status.slice(0,4)}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span>
+      </div>`).join(''):
+    `<div class="empty"><i class="fa-regular fa-folder-open"></i><p>No records found</p></div>`;
+}
+
+function clearHF(){
+  const s=document.getElementById('hfStatus');
+  const d=document.getElementById('hfDest');
+  if(s)s.value='all'; if(d)d.value='all';
+  renderHist();
+}
+
+/* ══════════════════════════════════════════════════════
+   RESET SYSTEM
+══════════════════════════════════════════════════════ */
+function resetSystem(){
+  if(!confirm('Reset ALL pass data? This cannot be undone.')) return;
+  localStorage.removeItem('dp_passes');
+  alerted={};
+  seedData();
+  toast('System reset successfully','t-in');
+  const active=document.querySelector('.panel.active');
+  if(active) navTo(active.id);
+}
+
+/* ══════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════ */
+const TICONS={'t-ok':'fa-circle-check','t-er':'fa-circle-xmark','t-wa':'fa-triangle-exclamation','t-in':'fa-circle-info'};
+function toast(msg,type='t-in'){
+  const box=document.getElementById('toastBox');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<i class="fa-solid ${TICONS[type]||'fa-circle-info'}"></i><span>${msg}</span>`;
+  box.appendChild(t);
+  setTimeout(()=>{t.style.animation='toastOut .3s ease forwards';setTimeout(()=>t.remove(),300);},3800);
+}
+
+/* ══════════════════════════════════════════════════════
+   SIDEBAR MOBILE
+══════════════════════════════════════════════════════ */
+function openSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('sbOv').classList.add('open')}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sbOv').classList.remove('open')}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+// Session restore
+if(CU){
+  seedData();
+  document.getElementById('loginPage').style.display='none';
+  showApp();
+}
+
+// Enter key on login
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('loginPage').style.display!=='none') doLogin();
+});
+
+// Close QR on overlay click
+document.getElementById('qrModal').addEventListener('click',function(e){
+  if(e.target===this) closeQR();
+});
+</script>
+</body>
+</html>
